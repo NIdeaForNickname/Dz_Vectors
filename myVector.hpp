@@ -2,9 +2,10 @@
 #include <string>
 
 using namespace std;
+template<typename T = int>
 class Vector{
     private:
-        int* arr = nullptr;
+        T* arr = nullptr;
         int size;
         int capacity;
     public:
@@ -15,26 +16,26 @@ class Vector{
             }
             this->size = size;
             capacity = size * 2;
-            arr = new int[capacity];
+            arr = new T[capacity];
         }
         
         Vector() : Vector(0) {}
 
-        Vector(const Vector &arr){
-            this->arr = new int[arr.capacity];
+        Vector(const Vector<T> &arr){
+            this->arr = new T[arr.capacity];
             size = arr.size;
             capacity = arr.capacity;
-            for(int i = 0; i < size; i++){
+            for(T i = 0; i < size; i++){
                 this->arr[i] = arr.arr[i];
             }
         }
 
-        Vector(initializer_list<int> list){
+        Vector(initializer_list<T> list){
             capacity = list.size()*2;
             size = list.size();
-            arr = new int[capacity];
-            int i = 0;
-            for (int value: list){
+            arr = new T[capacity];
+            T i = 0;
+            for (T value: list){
                 arr[i++] = value;
             }
         }
@@ -42,20 +43,23 @@ class Vector{
         int Size() const { return size; }
         int Cap() const { return capacity; }
 
-        void insert(int x, int ind) {
+        void insert(T x, int ind) {
             if (ind < 0 || ind > size) {
                 return;
             }
 
             if (size < capacity) {
+                // Shift elements to the right
                 for (int i = size; i > ind; i--) {
                     arr[i] = arr[i - 1];
                 }
                 arr[ind] = x;
             } else {
+                // Expand capacity and create a new array
                 capacity = (capacity*2)+1;
-                int* newArr = new int[capacity * 2];
+                T* newArr = new T[capacity * 2];
 
+                // Copy elements into the new array with the new element at `ind`
                 for (int i = 0; i < size + 1; i++) {
                     if (i < ind) {
                         newArr[i] = arr[i];
@@ -66,13 +70,14 @@ class Vector{
                     }
                 }
 
+                // Free the old array memory and assign the new array
                 delete[] arr;
                 arr = newArr;
             }
             size++;
         }
 
-        void Append(int a){
+        void Append(T a){
             insert(a, size);
         }
 
@@ -86,7 +91,7 @@ class Vector{
             size--;
         }
 
-        void RemoveByValue(int value){
+        void RemoveByValue(T value){
             for (int i = 0; i < size; i++){
                 if(arr[i] == value){
                     RemoveAt(i);
@@ -104,7 +109,7 @@ class Vector{
         }
 
         void TrimToSize(){
-            int* newArr = new int[size];
+            T* newArr = new T[size];
             for(int i = 0; i < size; i++){
                 newArr[i] = arr[i];
             }
@@ -113,7 +118,7 @@ class Vector{
             capacity = size;
         }
 
-        int IndexOf(int value){
+        int IndexOf(T value){
             for (int i = 0; i < size; i++){
                 if(arr[i] == value){
                     return i;
@@ -123,7 +128,7 @@ class Vector{
         }
 
         void Reverse(){
-            int temp;
+            T temp;
             for(int i = 0; i < size/2; i++){
                 temp = arr[i];
                 arr[i] = arr[size-i-1];
@@ -135,7 +140,7 @@ class Vector{
             for(int i = 0; i < size-1; i++){ 
                 for(int j = 0; j < size-i-1; j++){
                     if(arr[j] > arr[j+1]){
-                        int temp = arr[j];
+                        T temp = arr[j];
                         arr[j] = arr[j+1];
                         arr[j+1] = temp;
                     }
@@ -151,19 +156,19 @@ class Vector{
         void Shuffle(){
             for(int i = 0; i < size; i++){
                 int j = rand() % size;
-                int temp = arr[i];
+                T temp = arr[i];
                 arr[i] = arr[j];
                 arr[j] = temp;
             }
         }
 
-        void RandomFill(int lower, int upper){
-            for(int i = 0; i < size; i++){
-                arr[i] = rand() % (upper - lower + 1) + lower;
-            }
-        }
+        // void RandomFill(int lower, int upper){
+        //     for(int i = 0; i < size; i++){
+        //         arr[i] = rand() % (upper - lower + 1) + lower;
+        //     }
+        // }
 
-        bool Equals(const Vector& vect) const {
+        bool Equals(const Vector<T>& vect) const {
             if (vect.Size() == size){
                 for (int i = 0; i < size; i++){
                     if (arr[i] != arr[i]) {
@@ -174,6 +179,12 @@ class Vector{
             } else {
                 return false;
             }
+        }
+
+        T Random(){
+            if (size == 0) {throw "cant divide by 0";}
+            srand(time(0));
+            return arr[rand() % size];
         }
 
         int GetElementAt(int i){ // мне кажеться или был какой-то способ дать функции/методу несколько имён?
@@ -196,28 +207,28 @@ class Vector{
             return ss;
         }
 
-        int& operator[](int i) {
+        T& operator[](int i) {
             if(i < 0 || i >= size){
                 throw "Invalid index";
             }
             return arr[i]; 
         } 
 
-        bool operator== (const Vector& v) const {
+        bool operator== (const Vector<T>& v) const {
             return Equals(v);
         }
 
-        Vector& operator= (const Vector& v){
+        Vector<T>& operator= (const Vector<T>& v){
             if (&v == this) {
                 return *this;
             }
 
-            Vector::~Vector();
+            this->~Vector();
             *this=v;
             return *this;
         }
 
-        Vector& operator= (int v) {
+        Vector<T>& operator= (int v) {
             *this=v;
             return *this;
         }
@@ -228,11 +239,14 @@ class Vector{
             }
         }
 
-        friend ostream& operator<<(ostream& os, const Vector& vect);
-        friend istream& operator>>(istream& os, const Vector& vect);
+        template<typename U>
+        friend ostream& operator<<(ostream& os, const Vector<U>& vect);
+        template<typename U>
+        friend istream& operator>>(istream& os, const Vector<U>& vect);
 };
 
-ostream& operator<<(ostream& os, const Vector& vect){
+template<typename U>
+ostream& operator<<(ostream& os, const Vector<U>& vect){
     for (int i = 0; i < vect.size-1; i++){
         os << vect.arr[i] << ", ";
     }
@@ -240,12 +254,14 @@ ostream& operator<<(ostream& os, const Vector& vect){
     return os;
 }
 
-istream& operator>>(istream& is, const Vector& vect){
+template<typename U>
+istream& operator>>(istream& is, Vector<U>& vect){
     int temp = 0;
     cout << "Input Vector size: ";
     cin >> temp;
     if (temp < 0){
         throw "wrong vector size";
     };
+    vect = temp;
     return is;
 }

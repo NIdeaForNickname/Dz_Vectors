@@ -1,46 +1,42 @@
-#include <iostream>
 #include "myVector.hpp"
+#include <iostream>
+#include <fstream>
 
-using namespace std;
 int main(){
-    Vector myVector(5);
+    ifstream in;
+    in.open("words.txt");
+    if(!in.is_open()){
+        throw "Error: cannot open";
+    }
 
-    myVector.Append(1);
-    myVector.Append(2);
-    myVector.Append(3);
-    myVector.Append(4);
-    myVector.Append(5);
-    myVector.insert(3, 4);
+    string str, temp, result;
+    Vector<string> vector, v1;
 
-    cout << myVector << "\n";
+    while(getline(in, str)){
+        vector.Append(str);
+    }
 
-    myVector.PopBack();
+    do{
+        do{
+            str = vector.Random();
+        } while(str.size() < 8);
+        temp = (str.size() < 6) ? str.substr(str.size()-4) : str.substr(str.size()-6);
 
-    cout << myVector << "\n";
-
-    cout << "Size: " << myVector.Size() << "\n" << "Capacity: " << myVector.Cap() << "\n";
-    myVector.TrimToSize();
-    cout << "Size: " << myVector.Size() << "\n" << "Capacity: " << myVector.Cap() << "\n";
-
-    myVector.Shuffle();
-    cout << myVector << "\n";
-
-    myVector.SortAsc();
-    cout << myVector << "\n";
-
-    myVector.RandomFill(-10, 10);
-    cout << myVector << "\n";
-
-    myVector.RemoveByValue(2);
-    cout << myVector << "\n";
-
-    cout << "location of 3(-1 if not present): " << myVector.IndexOf(3) << "\n";
-
-    Vector myCopy = myVector;
-    cout << myCopy << "\n";
-
+        for (int i = 0; i < vector.Size(); i++){
+            if (vector[i].substr(0,6) == temp){
+                v1.Append(vector[i].substr(6));
+            }
+        }
+    } while (v1.Size() == 0);
     
-    cout << endl;
+    result += str.substr(0, str.size()-6);
+    result += "-";
+    result += temp;
+    result += "-";
+    result += v1.Random();
 
+    cout << result << endl;
+
+    in.close();
     return 0;
 }
